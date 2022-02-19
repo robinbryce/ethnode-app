@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+# requires a traefik instance with the kubernetes provider enabled
+
+kind: IngressRoute
+metadata:
+  name: iona-app
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`iona-app.dev`) && PathPrefix(`/ingressroute-prefix/`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: iona-app
+          scheme: http
+          port: http
+      middlewares:
+        - name: strip-ingressroute-prefix
+  tls:
+    secretName: iona-app-dev

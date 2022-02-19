@@ -1,0 +1,29 @@
+# skaffold build -t latest -d ""
+apiVersion: skaffold/v2beta10
+kind: Config
+build:
+  tagPolicy:
+    gitCommit:
+      variant: AbbrevCommitSha
+  local:
+    push: true
+    concurrency: 8
+    useBuildkit: true
+
+  artifacts:
+    - image: iona-app
+      context: .
+
+deploy:
+  kustomize:
+    paths:
+      - k8s/tmp/dev
+
+profiles:
+  - name: build
+    # just build the images, don't push (not compatible with deploy)
+    build:
+      local:
+        push: false
+        concurrency: 8
+        useBuildkit: true

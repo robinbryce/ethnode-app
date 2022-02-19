@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iona-app
+  labels:
+    app: iona-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iona-app
+  template:
+    metadata:
+      labels:
+        app: iona-app
+    spec:
+      containers:
+        - name: service
+          image: iona-app
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"

@@ -1,0 +1,50 @@
+{
+  "name": "iona-app",
+  "version": "0.0.1",
+  "description": "web ui for the iona cluster",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production --config ./webpack.config.js --progress --mode production",
+    "webpack": "webpack --mode production",
+    "webpack-dev": "webpack --mode development",
+    "webpack-dev-server": "webpack-dev-server --history-api-fallback",
+    "prod": "npm run webpack -- --mode production --env.presets serviceworker",
+    "dev": "npm run webpack-dev-server -- --mode development --port 8086"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robinbryce/iona-app.git"
+  },
+  "author": "robinbryce@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/robinbryce/iona-app/issues"
+  },
+  "homepage": "https://github.com/robinbryce/iona-app#readme",
+  "devDependencies": {
+    "@babel/core": "^7.17.2",
+    "@babel/preset-env": "^7.16.11",
+    "babel-loader": "^8.2.3",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^10.2.4",
+    "css-loader": "^6.6.0",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.68.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "^5.8.0"
+  },
+  "dependencies": {
+    "@bundled-es-modules/axios": "^0.21.1",
+    "@webcomponents/webcomponentsjs": "^2.6.0",
+    "bootstrap.native": "^4.1.0-alpha5",
+    "core-js": "^3.21.0",
+    "firebase": "^9.6.6",
+    "firebaseui": "^6.0.0",
+    "lit-element": "^3.1.2",
+    "properties-reader": "^2.2.0",
+    "simple-wc-router": "^2.3.4"
+  }
+}

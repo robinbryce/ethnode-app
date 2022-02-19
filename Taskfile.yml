@@ -1,0 +1,181 @@
+---
+version: '3'
+silent: true
+
+env:
+  ENV: .local/dev
+  PROFILE: '{{.PROFILE | default ""}}'
+  # This override is provided so that the generate task can be used to
+  # quick start consumers of this repository with useful defaults.
+  K8S_GENERATE_DIR: '{{.K8S_GENERATE_DIR | default "k8s/tmp"}}'
+  CONSOLE_PATH_PREFIX: 'console/'
+
+vars:
+  BUILD_ARTIFACTS: k8s/tmp/skaffold/build-artifacts.json
+
+dotenv: [".env", '{{.ENV}}/.env', '{{.HOME}}/.env']
+
+tasks:
+
+  bootstrap:
+    desc: |
+      creates the {{.ENV}}/.env file and installs tooling. assumes a debain
+      like system (but uses python or brew where possible). for other platforms
+      run `task bootstrap --sumarize` and use the results to find the right
+      bits.  Note that .env (in the directory containing this Taskfile) is
+      never created or touched in anyway and has the highest precedence
+
+      NOTICE: to re-create {{.ENV}}/.env you MUST delete it first (else it will
+      be re-created with the same values
+
+    cmds:
+      - |
+        mkdir -p {{.ENV}}
+
+        rm -f {{.ENV}}/.env
+
+        CONTEXT=${CONTEXT:-$(kubectl config current-context)}
+        CLUSTER=$(kubectl config get-contexts ${CONTEXT} --no-headers=true | tr -s ' ' | cut -d ' ' -f3)
+        SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO:-eu.gcr.io/${CONTEXT}}
+        CONTEXT_NAMESPACE=${CONTEXT_NAMESPACE:-$(echo ${CONTEXT} | cut -d '-' -f1)}
+        NAMESPACE=${NAMESPACE:-${CONTEXT_NAMESPACE}-app}
+
+        APPNAME=${APPNAME:-"${CONTEXT_NAMESPACE}-app"}
+        HOST=${HOST:-"http://${CONTEXT_NAMESPACE}.${ORGANISATION}.${TLD}"}
+        DOMAIN=${DOMAIN:-"${ORGANISATION}.${TLD}"}
+        FQDN=${FQDN:-"${CONTEXT_NAMESPACE}.${DOMAIN}"}
+
+        cat <<EOF > {{.ENV}}/.env
+        CONTEXT=${CONTEXT}
+        CLUSTER=${CLUSTER}
+        SKAFFOLD_DEFAULT_REPO=${SKAFFOLD_DEFAULT_REPO}
+        CONTEXT_NAMESPACE=${CONTEXT_NAMESPACE}
+        NAMESPACE=${NAMESPACE}
+        APPNAME=${APPNAME}
+        PORT=${PORT}
+        HOST=${HOST}
+        DOMAIN=${DOMAIN}
+        FQDN=${FQDN}
+        EOF
+
+    env:
+      ORGANISATION: '{{.ORGANISATION | default "thaumagen"}}'
+      TLD: '{{.TLD | default "io"}}'
+      CONTEXT: "{{.CONTEXT}}"
+      CONTEXT_NAMESPACE: "{{.CONTEXT_NAMESPACE}}"
+      NAMESPACE: "{{.NAMESPACE}}"
+      SKAFFOLD_DEFAULT_REPO: "{{.SKAFFOLD_DEFAULT_REPO}}"
+      APPNAME: ""
+      PROFILE: '{{.PROFILE | default "local"}}'
+      PORT: '{{.PORT | default "80"}}'
+      HOST: ""
+      DOMAIN: ""
+      FQDN: ""
+
+  generate:
+    desc: 'generate context dependent manifests and secrets and so on'
+    cmds:
+      - |
+        mkdir -p {{.K8S_GENERATE_DIR}}/dev
+        mkdir -p $(dirname {{.BUILD_ARTIFACTS}})
+
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/namespace.yaml
+        kind: Namespace
+        apiVersion: v1
+        metadata:
+          name: ${NAMESPACE}
+        EOF
+
+        CERT_NAME=wild-$(echo ${FQDN} | tr '.' '-')
+
+        # middleware to strip /$CONSOLE_PATH_PREFIX
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/patch-middleware-stripprefix-ingressroute.yaml
+        - op: replace
+          path: /spec/stripPrefix/prefixes/0
+          value: /{{.CONSOLE_PATH_PREFIX}}
+        EOF
+
+        # traefik ingressroute
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/patch-ingressroute.yaml
+        - op: replace
+          path: /spec/routes/0/match
+          value: Host(\`${FQDN}\`) && PathPrefix(\`/{{.CONSOLE_PATH_PREFIX}}\`)
+        - op: replace
+          path: /spec/tls/secretName
+          value: ${CERT_NAME}
+        EOF
+
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/kustomization.yaml
+        namespace: ${NAMESPACE}
+        resources:
+          - ../../app
+          - ./namespace.yaml
+          - ./certificate.yaml
+        patchesJson6902:
+          - target:
+              kind: IngressRoute
+              name: iona-app
+            path: patch-ingressroute.yaml
+          - target:
+              kind: Middleware
+              name: strip-ingressroute-prefix
+            path: patch-middleware-stripprefix-ingressroute.yaml
+        EOF
+
+        cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/certificate.yaml
+        apiVersion: cert-manager.io/v1
+        kind: Certificate
+        metadata:
+          name: "${CERT_NAME}"
+        spec:
+          commonName: "${FQDN}"
+          secretName: ${CERT_NAME}
+          dnsNames:
+            - "${FQDN}"
+            - "*.${FQDN}"
+          issuerRef:
+            name: letsencrypt-staging-primary-dns
+            kind: ClusterIssuer
+        EOF
+
+    generates:
+      - "{{.K8S_GENERATE_DIR}}/dev/kustomization.yaml"
+      - "{{.K8S_GENERATE_DIR}}/dev/namespace.yaml"
+      - "{{.K8S_GENERATE_DIR}}/dev/certificate.yaml"
+      - "{{.K8S_GENERATE_DIR}}/dev/patch-middleware-stripprefix-ingressroute.yaml"
+      - "{{.K8S_GENERATE_DIR}}/dev/patch-ingressroute.yaml"
+
+  build:
+    desc: 'build the images'
+    cmds:
+      - |
+        skaffold build \
+          ${PROFILE:+-p $PROFILE} \
+          ${TAG:+-t $TAG} \
+          --file-output {{.BUILD_ARTIFACTS}}
+
+  dev:
+    desc: 'run localy in development mode'
+    cmds:
+      - |
+        npm run dev
+
+  deploy:
+    desc: 'deploy the app using skaffold'
+    precondition:
+      - test: -f {{.BUILD_ARTIFACTS}}
+        msg: "{{.BUILD_ARTIFACTS}} is missing, run `task build` first"
+    cmds:
+      - |
+        skaffold deploy \
+            ${CONTEXT:+--kube-context ${CONTEXT}} \
+            ${NAMESPACE:+-n $NAMESPACE} \
+            --build-artifacts {{.BUILD_ARTIFACTS}}
+
+  down:
+    desc: 'take the app down and clean up the k8s resources'
+    cmds:
+      - |
+        skaffold delete \
+            ${CONTEXT:+--kube-context ${CONTEXT}} \
+            ${NAMESPACE:+-n $NAMESPACE}

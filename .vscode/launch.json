@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // "type": "pwa-chrome",
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug iona-app (localhost)",
+            "port": 9222,
+            "url": "http://localhost:8086",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "timeout": 15000,
+            "trace":  "verbose", //,
+            "sourceMapPathOverrides": {
+                "meteor://💻app/*": "${workspaceFolder}/*",
+                "webpack:///./~/*": "${workspaceFolder}/node_modules/*",
+                "webpack://?:*/*": "${workspaceFolder}/*"
+            }
+            // "preLaunchTask": "start_server_task",
+        },
+        {
+            // "type": "pwa-chrome",
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug iona-app (iona.thaumagen.io)",
+            "port": 9222,
+            "url": "https://iona.thaumagen.io/",
+            "webRoot": "${workspaceFolder}",
+            "sourceMaps": true,
+            "timeout": 15000,
+            "trace":  "verbose", //,
+            "sourceMapPathOverrides": {
+                "meteor://💻app/*": "${workspaceFolder}/*",
+                "webpack:///./~/*": "${workspaceFolder}/node_modules/*",
+                "webpack://?:*/*": "${workspaceFolder}/*"
+            }
+            // "preLaunchTask": "start_server_task",
+        }
+
+    ]
+}
