@@ -39,10 +39,13 @@
   "dependencies": {
     "@bundled-es-modules/axios": "^0.21.1",
     "@webcomponents/webcomponentsjs": "^2.6.0",
+    "ajax": "^0.0.4",
     "bootstrap.native": "^4.1.0-alpha5",
     "core-js": "^3.21.0",
     "firebase": "^9.6.6",
     "firebaseui": "^6.0.0",
+    "jquery": "^3.6.0",
+    "jquery-ajax": "^2.1.4",
     "lit-element": "^3.1.2",
     "properties-reader": "^2.2.0",
     "simple-wc-router": "^2.3.4"

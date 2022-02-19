@@ -17,6 +17,9 @@ limitations under the License.
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Identity Platform Multi-tenant Example</title>
 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
   <!-- Material Design Theming -->
   <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.orange-indigo.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -60,6 +63,10 @@ limitations under the License.
           <div class="quickstart-user-details-container">
             Firebase sign-in status: <span id="quickstart-sign-in-status">Unknown</span>
             <div>Tenant ID: <span id="quickstart-tenant-id">null</span></div>
+            <div id="network-details">
+              <pre id="block-height"></pre>
+              <pre id="node-info"></pre>
+            </div>
             <div>Firebase auth <code>currentUser</code> object value:</div>
             <pre><code id="quickstart-account-details">null</code></pre>
           </div>

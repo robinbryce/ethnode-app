@@ -99,6 +99,40 @@ function onSignInClickHandler(e) {
   document.getElementById('quickstart-tenant-modal-title').textContent = 'Tenant ID: ' + tenantId;
   document.getElementById('tenant-ui-modal').show();
 }
+
+function displayUserNodeInfo(user) {
+  user.getIdToken().then(function(jwt) {
+
+    const data=JSON.stringify({jsonrpc:"2.0", method:"eth_blockNumber", params: [], id: 1});
+    $.ajax({
+      // url: "/node/ethnode0",
+      url: "https://iona.thaumagen.io/node/ethnode0",
+      type: "POST",
+      headers: {
+        "Authorization": `Bearer ${jwt}`,
+        "Content-Type": "application/json"
+      },
+      data: data,
+      success: function(result) {
+        document.getElementById('block-height').textContent = JSON.stringify(result);
+      },
+      error: function(error) {
+        document.getElementById('block-height').textContent = `Error: ${JSON.stringify(error)}`;
+      }
+    })
+  });
+}
+
+function displayCurentUserNodeInfo() {
+
+  var user = auth.getAuth().currentUser;
+  if (user == null) {
+    console.log("no currently authenticated user")
+    return;
+  }
+  displayUserNodeInfo(user);
+}
+
 /**
  * Handles setting up UI event listeners and registering Firebase auth listeners:
  *  - firebase.auth().onAuthStateChanged: This listener is called when the user is signed in or
@@ -109,12 +143,14 @@ function initApp() {
   ui = new authui.AuthUI(auth.getAuth());
   // Dynamically initialize the tenant sign-in buttons.
   initializeSignInButtons();
+  displayCurentUserNodeInfo();
 
   auth.getAuth().onAuthStateChanged(function(user) {
     if (user) {
       document.getElementById('quickstart-sign-in-status').textContent = 'Signed in';
       document.getElementById('quickstart-account-details').textContent = JSON.stringify(user, null, '  ');
       document.getElementById('quickstart-tenant-id').textContent = user.tenantId;
+      displayUserNodeInfo(user);
     } else {
       document.getElementById('quickstart-sign-in-status').textContent = 'Signed out';
       document.getElementById('quickstart-account-details').textContent = 'null';
