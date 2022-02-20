@@ -1,12 +1,12 @@
-export const UPDATE_NAME = 'NODECONSOLE_UPDATE_NAME';
+export const UPDATE_NODENAME = 'NODECONSOLE_UPDATE_NODENAME';
 export const UPDATE_METHOD = 'NODECONSOLE_UPDATE_METHOD';
 export const UPDATE_PARAMS = 'NODECONSOLE_UPDATE_PARAMS';
 export const CALL_METHOD = 'NODECONSOLE_CALL_METHOD';
 
-export const updateName = name => {
+export const updateNodeName = nodename => {
     return {
-        type: UPDATE_NAME,
-        name
+        type: UPDATE_NODENAME,
+        nodename
     };
 };
 
@@ -23,9 +23,10 @@ export const updateParams = params => {
     };
 };
 
-export const callMethod = (requestId) => {
+export const callMethod = (request, response) => {
     return {
         type: CALL_METHOD,
-        requestId
+        request: request,
+        response: response
     };
 };

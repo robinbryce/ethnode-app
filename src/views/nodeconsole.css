@@ -29,6 +29,16 @@ body {
   display: none;
 }
 
+.idtoken {
+  inline-size: 200px;
+  word-break: break-all;
+}
+
+.idclaims {
+  inline-size: 200px;
+  overflow-wrap: break-word;
+}
+
 a {
   color: var(--dark-color);
 }
