@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode production --config ./webpack.config.js --progress --mode production",
-    "webpack": "webpack --mode production",
-    "webpack-dev": "webpack --mode development",
-    "webpack-dev-server": "webpack-dev-server --history-api-fallback",
-    "prod": "npm run webpack -- --mode production --env.presets serviceworker",
-    "dev": "npm run webpack-dev-server -- --mode development --port 8086"
+    "build": "webpack --env mode=production --config ./webpack.config.js --progress",
+    "webpack": "webpack --env mode=production",
+    "webpack-dev": "webpack --env mode=development",
+    "webpack-dev-server": "webpack-dev-server --env mode=development --history-api-fallback",
+    "prod": "npm run webpack -- --env mode=production --env.presets serviceworker",
+    "dev": "npm run webpack-dev-server -- --env mode=development --port 8086"
   },
   "repository": {
     "type": "git",
@@ -38,11 +38,18 @@
   },
   "dependencies": {
     "@bundled-es-modules/axios": "^0.21.1",
+    "@vaadin/vaadin-button": "^22.0.5",
+    "@vaadin/vaadin-text-field": "^22.0.5",
     "@webcomponents/webcomponentsjs": "^2.6.0",
     "core-js": "^3.21.0",
     "firebase": "^9.6.6",
     "firebaseui": "^6.0.0",
-    "lit-element": "^3.1.2",
-    "properties-reader": "^2.2.0"
+    "lit": "^2.2.0",
+    "mini-css-extract-plugin": "^2.5.3",
+    "nanoid": "^3.3.1",
+    "properties-reader": "^2.2.0",
+    "pwa-helpers": "^0.9.1",
+    "redux": "^4.1.2",
+    "reselect": "^4.1.5"
   }
 }

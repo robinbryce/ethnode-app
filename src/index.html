@@ -15,8 +15,8 @@ limitations under the License.
 <head>
   <meta charset=utf-8 />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Identity Platform Multi-tenant Example</title>
-
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Iona Console</title>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -28,6 +28,25 @@ limitations under the License.
   <!-- <link rel="stylesheet" href="main.css"> -->
   <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css" />
 
+  <!-- from vaadin turorials at https://vaadin.com/learn/tutorials/lit-element -->
+  <link rel="icon" type="image/png" href="./img/icons/favicon.png" />
+  <meta name="theme-color" content="#2A3443" />
+  <meta name="description" content="Tutorial app." />
+
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="./img/icons/icon-144x144.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-status-bar-style" content="black" />
+  <meta name="mobile-web-app-title" content="TutorialApp" />
+
+  <script>
+    if (!window.customElements) {
+      document.write('<!--');
+    }
+  </script>
+  <script src="./vendor/custom-elements-es5-adapter.js"></script>
+  <!-- ! DO NOT REMOVE THIS COMMENT, WE NEED ITS CLOSING MARKER -->
+
 </head>
 <body>
 <!-- <script src="./index.js"></script> -->
@@ -37,12 +56,19 @@ limitations under the License.
   <header class="mdl-layout__header mdl-color-text--white mdl-color--light-blue-700">
     <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-grid">
       <div class="mdl-layout__header-row mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-cell--8-col-desktop">
-        <a href="/"><h3 class="gcip-heading">Google Cloud Identity Platform</h3></a>
+        <a href="/"><h3 class="gcip-heading">Iona Console</h3></a>
       </div>
     </div>
   </header>
 
   <main id="main" class="mdl-layout__content mdl-color--grey-100">
+
+    <pre id="block-height"></pre>
+    <node-console></node-console>
+    <!--
+            <div id="network-details">
+            </div>-->
+
     <div class="mdl-cell mdl-cell--12-col mdl-cell--12-col-tablet mdl-grid">
 
       <!-- Container for the demo -->
@@ -63,23 +89,20 @@ limitations under the License.
           <div class="quickstart-user-details-container">
             Firebase sign-in status: <span id="quickstart-sign-in-status">Unknown</span>
             <div>Tenant ID: <span id="quickstart-tenant-id">null</span></div>
-            <div id="network-details">
-              <pre id="block-height"></pre>
-              <pre id="node-info"></pre>
-            </div>
             <div>Firebase auth <code>currentUser</code> object value:</div>
             <pre><code id="quickstart-account-details">null</code></pre>
           </div>
         </div>
         <!--FirebaseUI container dialog -->
-        <dialog id="tenant-ui-modal" class="mdl-dialog">
+        <dialog id="auth-modal" class="mdl-dialog">
           <i id="close-modal-icon" class="material-icons close-icon">cancel</i>
-          <h4 id="quickstart-tenant-modal-title" class="mdl-card__supporting-text"></h4>
+          <h4 id="auth-modal-title" class="mdl-card__supporting-text"></h4>
           <div id="firebaseui-auth-container"></div>
         </dialog>
       </div>
     </div>
   </main>
+  <script src="./vendor/webcomponents-loader.js"></script>
 </div>
 
 </body>

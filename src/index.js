@@ -2,6 +2,8 @@ import * as auth from 'firebase/auth';
 import {auth as authui }  from 'firebaseui';
 import { initializeApp } from 'firebase/app';
 
+import './views/nodeconsole.js';
+
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -47,7 +49,7 @@ var TENANT_CONFIG = {
       'signInFlow': 'popup',
       'callbacks': {
         'signInSuccessWithAuthResult': function(authResult, redirectUrl) {
-          document.getElementById('tenant-ui-modal').close();
+          document.getElementById('auth-modal').close();
           return false;
         }
       }
@@ -61,7 +63,7 @@ var TENANT_CONFIG = {
       'signInFlow': 'popup',
       'callbacks': {
         'signInSuccessWithAuthResult': function(authResult, redirectUrl) {
-          document.getElementById('tenant-ui-modal').close();
+          document.getElementById('auth-modal').close();
           return false;
         }
       }
@@ -96,8 +98,8 @@ function onSignInClickHandler(e) {
   auth.getAuth().tenantId = tenantId;
   ui.reset();
   ui.start('#firebaseui-auth-container', TENANT_CONFIG[tenantId]['uiConfig']);
-  document.getElementById('quickstart-tenant-modal-title').textContent = 'Tenant ID: ' + tenantId;
-  document.getElementById('tenant-ui-modal').show();
+  document.getElementById('auth-modal-title').textContent = 'Tenant ID: ' + tenantId;
+  document.getElementById('auth-modal').show();
 }
 
 function displayUserNodeInfo(user) {
@@ -105,8 +107,8 @@ function displayUserNodeInfo(user) {
 
     const data=JSON.stringify({jsonrpc:"2.0", method:"eth_blockNumber", params: [], id: 1});
     $.ajax({
-      // url: "/node/ethnode0",
-      url: "https://iona.thaumagen.io/node/ethnode0",
+      url: "/node/ethnode0",
+      // url: "https://iona.thaumagen.io/node/ethnode0",
       type: "POST",
       headers: {
         "Authorization": `Bearer ${jwt}`,
@@ -157,10 +159,10 @@ function initApp() {
       document.getElementById('quickstart-tenant-id').textContent = 'null';
     }
     document.getElementById('close-modal-icon').addEventListener('click', function() {
-      document.getElementById('tenant-ui-modal').close();
+      document.getElementById('auth-modal').close();
     });
     document.getElementById('sign-out').addEventListener('click', function() {
-      auth().signOut();
+      auth.getAuth().signOut();
     });
   });
 }

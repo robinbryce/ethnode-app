@@ -4,36 +4,55 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { merge } = require('webpack-merge');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const webcomponentsjs = './node_modules/@webcomponents/webcomponentsjs';
 const PropertiesReader = require('properties-reader');
 const appProperties = PropertiesReader('./src/assets/app.properties')._properties;
+const modeConfig = env => require(`./tools/webpack.${env.mode}.js`)(env);
+const loadPresets = require('./tools/loadPresets');
+
+const webcomponentsjs = './node_modules/@webcomponents/webcomponentsjs';
 
 const polyfills = {
   patterns: [
   {
     from: resolve(`${webcomponentsjs}/webcomponents-*.{js,map}`),
-    to: 'vendor'
+    to: 'vendor'//,
   },
   {
     from: resolve(`${webcomponentsjs}/bundles/*.{js,map}`),
-    to: 'vendor/bundles'
+    to: 'vendor/bundles'//,
   },
   {
     from: resolve(`${webcomponentsjs}/custom-elements-es5-adapter.js`),
-    to: 'vendor'
+    to: 'vendor',
   }
 ]};
 
 const assets = {
   patterns:[
-  {
-    from: 'src/assets',
-    to: 'assets/'
-  },
-  {
-    from: 'src/*.html',
-    to: ''
-  }]
+    {
+      from: 'src/assets',
+      to: 'assets/'
+    },
+    {
+      from: 'src/*.html',
+      to: ''
+    },
+    {
+      from: 'src/img',
+      to: 'img/'
+    },
+    {
+      // from: resolve(`${webcomponentsjs}/*.js`),
+      from: resolve(`${webcomponentsjs}/custom-elements-es5-adapter.js`),
+      to: 'vendor'
+    },
+    {
+      // from: resolve(`${webcomponentsjs}/*.js`),
+      from: resolve(`${webcomponentsjs}/webcomponents-loader.js`),
+      to: 'vendor'
+    }
+
+  ]
 };
 
 const plugins = [
@@ -60,7 +79,7 @@ module.exports = ({ mode, presets }) => {
       index: './src/index.js'
     },
     externals: {
-     'appProperties': JSON.stringify(appProperties)
+         'appProperties': JSON.stringify(appProperties)
     },
     mode,
     output: {
@@ -89,6 +108,8 @@ module.exports = ({ mode, presets }) => {
       }]
       },
       plugins
-    }
+    },
+    modeConfig({ mode, presets }),
+    loadPresets({ mode, presets })
   ); //webpackMerge
 };
