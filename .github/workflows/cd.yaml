@@ -1,0 +1,44 @@
+name: Build and push to iona's container registry
+on: [push]
+jobs:
+  job_id:
+    steps:
+      - uses: 'actions/checkout@v3'
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          workoad_identity_provider: 'projects/iona-1/locations/global/workloadIdentityPools/github-oidc/providers/github-provider'
+          service_account: 'gha-cd-iona-app@iona-1.iam.gserviceaccount.com'
+
+      - uses: 'docker/login-action@v1'
+        with:
+          registry: 'gcr.io' # or REGION-docker.pkg.dev
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+
+      # - run: |-
+      #     echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://REGION-docker.pkg.dev
+
+      - run: |-
+          echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
+
+      - id: build_id
+        name: Generate build ID
+        run: |
+            branch=${GITHUB_REF##*/}
+            sha=${GITHUB_SHA::8}
+            calver=$(date +%g.%m%d).${{ github.run_number }}
+
+            echo "::set-output name=BUILD_ID::${branch}-${sha}-${calver}"
+
+      - name: Build and publish container image with tag
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          tags: |
+                        ${{ env.IMAGE }}:${{ steps.build_id.outputs.BUILD_ID }}

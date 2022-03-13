@@ -2,3 +2,4 @@ node_modules
 .local
 k8s/tmp
 *.code-workspace
+gha-creds-*.json

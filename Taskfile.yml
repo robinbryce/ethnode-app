@@ -8,6 +8,7 @@ env:
   # This override is provided so that the generate task can be used to
   # quick start consumers of this repository with useful defaults.
   K8S_GENERATE_DIR: '{{.K8S_GENERATE_DIR | default "k8s/tmp"}}'
+  GENERATE_DIR: '{{.DEV_GENERATE_DIR | default "tmp"}}'
   CONSOLE_PATH_PREFIX: 'console/'
 
 vars:
@@ -78,6 +79,7 @@ tasks:
       - |
         mkdir -p {{.K8S_GENERATE_DIR}}/dev
         mkdir -p $(dirname {{.BUILD_ARTIFACTS}})
+        mkdir -p {{.GENERATE_DIR}}/dev
 
         cat <<EOF > {{.K8S_GENERATE_DIR}}/dev/namespace.yaml
         kind: Namespace
@@ -138,12 +140,35 @@ tasks:
             kind: ClusterIssuer
         EOF
 
+
+
     generates:
       - "{{.K8S_GENERATE_DIR}}/dev/kustomization.yaml"
       - "{{.K8S_GENERATE_DIR}}/dev/namespace.yaml"
       - "{{.K8S_GENERATE_DIR}}/dev/certificate.yaml"
       - "{{.K8S_GENERATE_DIR}}/dev/patch-middleware-stripprefix-ingressroute.yaml"
       - "{{.K8S_GENERATE_DIR}}/dev/patch-ingressroute.yaml"
+
+  devcert:
+    desc: 'make a certificate for localhost'
+    cmds:
+      - |
+        mkdir -p {{.GENERATE_DIR}}/dev
+        DEV_DOMAIN=localhost
+
+        # certificate for local development
+        pushd {{.GENERATE_DIR}}/dev
+
+        openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+          -keyout ${DEV_DOMAIN}.key -out ${DEV_DOMAIN}.crt -extensions san -config \
+          <(echo "[req]";
+            echo distinguished_name=req;
+            echo "[san]";
+            echo subjectAltName=DNS:${DEV_DOMAIN},IP:10.0.0.1,IP:127.0.0.1
+            ) \
+          -subj "/CN=${DEV_DOMAIN}"
+
+        popd
 
   build:
     desc: 'build the images'
@@ -170,12 +195,21 @@ tasks:
         skaffold deploy \
             ${CONTEXT:+--kube-context ${CONTEXT}} \
             ${NAMESPACE:+-n $NAMESPACE} \
+            --label=user-deploy=$USER-iona-app \
             --build-artifacts {{.BUILD_ARTIFACTS}}
 
   down:
     desc: 'take the app down and clean up the k8s resources'
     cmds:
       - |
-        skaffold delete \
-            ${CONTEXT:+--kube-context ${CONTEXT}} \
-            ${NAMESPACE:+-n $NAMESPACE}
+        for resource in $(kubectl api-resources --verbs=list --namespaced -o name); do
+          for target in $(kubectl get \
+            --show-kind \
+            -l user-deploy=$USER-iona-app \
+            --ignore-not-found \
+            -n $NAMESPACE \
+            -o name ${resource} 2> /dev/null); do
+            echo $target
+            kubectl delete $target -n $NAMESPACE
+          done
+        done

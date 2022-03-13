@@ -10,7 +10,7 @@
             "request": "launch",
             "name": "Debug iona-app (localhost)",
             "port": 9222,
-            "url": "http://localhost:8086/console/",
+            "url": "https://localhost:8086/console/",
             "webRoot": "${workspaceFolder}",
             "sourceMaps": true,
             "timeout": 15000,

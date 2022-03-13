@@ -1,7 +1,12 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const fs = require('fs');
 
 module.exports = ({nodehost = "https://iona.thaumagen.io"}) => ({
   devServer: {
+    server: 'https',
+    // https: true,
+    // key: fs.readFileSync("./tmp/dev/localhost.key"),
+    // cert: fs.readFileSync("./tmp/dev/localhost.crt"),
     proxy: {
       "/node": {
         "changeOrigin": true,

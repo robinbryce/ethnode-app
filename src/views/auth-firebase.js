@@ -5,7 +5,7 @@ import '@vaadin/vaadin-button';
 
 import {
   getAuth,
-  EmailAuthProvider,
+  /* EmailAuthProvider,*/
   GoogleAuthProvider,
   signInWithPopup
 } from 'firebase/auth';
@@ -32,76 +32,18 @@ initializeApp(firebaseConfig);
 
 const THAUMAGEN_TENANT='thaumagen-h92cb';
 const PUBLIC_TENANT='public-69cvf';
-/**
- * The configuration object for each tenant project keyed by tenant ID.
- * The tenant name will be displayed on the sign-in buttons. uiConfig will
- * be used to config FirebaseUI. You can specify the provider you'd like
- * to enable for each tenant.
- *
- * You'll need to substitute the `TENANT_ID` with the tenant IDs of your
- * project and `tenantName` with the display names you'd like to use for
- * the tenant selection buttons.
- *
- * For SAML, OIDC and generic OAuth providers, you'll need to configure
- * the `provider`, `providerName`, `buttonColor` and `iconUrl` in
- * `signInOptions`.
- */
+
+// This structure was originaly for the benefit of firebaseui but we don't use
+// that anymore.
 var TENANT_CONFIG = {
   [THAUMAGEN_TENANT]: {
 
-    'tenantName': 'Thaumagen',
-    'uiConfig': {
-      'signInOptions': [
-        EmailAuthProvider.PROVIDER_ID,
-        GoogleAuthProvider.PROVIDER_ID],
-      'credentialHelper': 'none',
-      'signInFlow': 'popup',
-      'callbacks': {
-        'signInSuccessWithAuthResult': function(authResult, redirectUrl) {
-          document.getElementById('auth-modal').close();
-          return false;
-        }
-      }
-    }
+    'tenantName': 'Thaumagen'
   },
   [PUBLIC_TENANT]: {
-    'tenantName': 'General public',
-    'uiConfig': {
-      'signInOptions': [GoogleAuthProvider.PROVIDER_ID],
-      'credentialHelper': 'none',
-      'signInFlow': 'popup',
-      'callbacks': {
-        'signInSuccessWithAuthResult': function(authResult, redirectUrl) {
-          document.getElementById('auth-modal').close();
-          return false;
-        }
-      }
-    }
+    'tenantName': 'Public'
   }
 };
-
-function displayUserNodeInfo(user) {
-  user.getIdToken().then(function(jwt) {
-
-    const data=JSON.stringify({jsonrpc:"2.0", method:"eth_blockNumber", params: [], id: 1});
-    $.ajax({
-      url: "/node/ethnode0",
-      // url: "https://iona.thaumagen.io/node/ethnode0",
-      type: "POST",
-      headers: {
-        "Authorization": `Bearer ${jwt}`,
-        "Content-Type": "application/json"
-      },
-      data: data,
-      success: function(result) {
-        document.getElementById('block-height').textContent = JSON.stringify(result);
-      },
-      error: function(error) {
-        document.getElementById('block-height').textContent = `Error: ${JSON.stringify(error)}`;
-      }
-    })
-  });
-}
 
 function parseJwt (token) {
   var base64Url = token.split('.')[1];
@@ -111,8 +53,6 @@ function parseJwt (token) {
   }).join(''));
   return JSON.parse(jsonPayload);
 };
-
-
 class AuthFirebase extends connect(store)(LitElement) {
 
   static get properties() {
