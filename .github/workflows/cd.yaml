@@ -30,6 +30,9 @@ jobs:
       - run: |-
           echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
+      - run: |-
+          echo '${{ steps.auth.outputs.access_token }}' | jq .
+
       - id: build_id
         name: Generate build ID
         run: |
