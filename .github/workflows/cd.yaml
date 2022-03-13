@@ -1,7 +1,9 @@
 name: Build and push to iona's container registry
 on: [push]
 jobs:
-  job_id:
+  cd:
+    name: Build and push to iona's container registry
+    runs-on: ubuntu-latest
     steps:
       - uses: 'actions/checkout@v3'
 
