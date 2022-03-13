@@ -46,4 +46,4 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: |
-                        ${{ env.IMAGE }}:${{ steps.build_id.outputs.BUILD_ID }}
+                        ${{ env.IMAGE }}${{ steps.build_id.outputs.BUILD_ID }}
