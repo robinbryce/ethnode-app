@@ -1,5 +1,8 @@
 name: Build and push to iona's container registry
 on: [push]
+permissions:
+  id-token: write
+  contents: read
 jobs:
   cd:
     name: Build and push to iona's container registry
