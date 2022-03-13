@@ -29,6 +29,9 @@ jobs:
 
       - run: |-
           echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io/iona-1
+          ls gha-creds-*.json
+          cat gha-creds-*.json
+
 
       - id: build_id
         name: Generate build ID
