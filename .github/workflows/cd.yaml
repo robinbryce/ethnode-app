@@ -31,8 +31,9 @@ jobs:
           echo '${{ steps.auth.outputs.access_token }}' | docker login -u oauth2accesstoken --password-stdin https://gcr.io
 
       - run: |-
-          echo '${{ steps.auth.outputs.access_token }}'
-          echo '${{ steps.auth.outputs.access_token }}' | cut -d '.' -f2 | base64 -d | jq .
+          echo '${{ steps.auth.outputs.access_token }}' > token
+          cat token
+          cat token | cut -d '.' -f2 | base64 -d | jq .
 
       - id: build_id
         name: Generate build ID
