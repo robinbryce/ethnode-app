@@ -15,7 +15,7 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           token_format: 'access_token'
-          workload_identity_provider: 'projects/871349271977/locations/global/workloadIdentityPools/github-oidc/providers/github-provider'
+          workload_identity_provider: 'projects/871349271977/locations/global/workloadIdentityPools/github-oidc-1/providers/github-provider'
           service_account: 'gha-cd-iona-app@iona-1.iam.gserviceaccount.com'
 
       - uses: 'docker/login-action@v1'
