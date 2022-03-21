@@ -73,7 +73,7 @@ class NodeConsole extends connect(store)(LitElement) {
       </vaadin-text-field>
 
       <vaadin-text-field
-        placeholder="Method name, eg eth_blockNumber"
+        placeholder="Method, eg eth_blockNumber"
         value="${this.method}" 
         @change="${this.updateMethod}"> 
       </vaadin-text-field>
