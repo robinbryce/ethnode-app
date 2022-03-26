@@ -22,3 +22,7 @@ spec:
           env:
             - name: PORT
               value: "80"
+            - name: NODE_PATH
+              value: node
+            - name: CHAIN_PROVIDER_PATH
+              value: chain1

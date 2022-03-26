@@ -126,6 +126,7 @@ class NodeConsole extends connect(store)(LitElement) {
   static get properties() {
     return {
       path: {type: String},
+      chain_path: {type: String},
       nodename: {type: String},
       method: {type: String},
       params: {type: String},
@@ -155,6 +156,7 @@ class NodeConsole extends connect(store)(LitElement) {
 
     this.chainId = state.nodeConsole.chainId;
     this.path = state.nodeConsole.path;
+    this.chain_path = state.nodeConsole.chain_path;
     this.nodename = state.nodeConsole.nodename;
     this.idToken = state.auth.idToken;
 

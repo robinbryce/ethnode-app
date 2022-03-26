@@ -7,10 +7,14 @@ import {
     CALL_PROVIDER_METHOD
 } from './nodeconsole-actions.js'
 
+const NODE_PATH = process.env.NODE_PATH || "node"
+const CHAIN_PROVIDER_PATH = process.env.CHAIN_PROVIDER_PATH || "chain"
+
 const INITIAL_STATE = {
     chainId: "0x63",
     accounts: [],
-    path: 'node',
+    path: NODE_PATH,
+    chain_path: CHAIN_PROVIDER_PATH,
     nodename: 'ethnode0',
     method: 'eth_blockNumber',
     params: '[]',
