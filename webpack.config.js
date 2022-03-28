@@ -86,7 +86,8 @@ module.exports = ({ mode, presets }) => {
       path: resolve(__dirname, "./dist/"),
       // filename: '[name].[chunkhash:8].js',
       filename: '[name].js',
-      publicPath: '/console/',
+      // https://webpack.js.org/guides/public-path/
+      publicPath: 'auto', // auto doesn't work for IE but I don't care
     },
     devtool: "source-map",
     module: {

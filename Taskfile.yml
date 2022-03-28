@@ -9,7 +9,7 @@ env:
   # quick start consumers of this repository with useful defaults.
   K8S_GENERATE_DIR: '{{.K8S_GENERATE_DIR | default "k8s/tmp"}}'
   GENERATE_DIR: '{{.DEV_GENERATE_DIR | default "tmp"}}'
-  CONSOLE_PATH_PREFIX: 'console/'
+  CONSOLE_PATH_PREFIX: 'dev/console/'
 
 vars:
   BUILD_ARTIFACTS: k8s/tmp/skaffold/build-artifacts.json
