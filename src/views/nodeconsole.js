@@ -10,7 +10,7 @@ import MetaMaskOnboarding from '@metamask/onboarding';
 import { store } from '../redux/store.js';
 
 import {
-  updateNodeName,
+  updateProviderPath,
   updateMethod,
   updateParams,
   updateAPIKey,
@@ -67,9 +67,9 @@ class NodeConsole extends connect(store)(LitElement) {
         @keyup="${this.shortcutListener}"> 
 
       <vaadin-text-field
-        placeholder="Node name, eg ethnode0"
-        value="${this.nodename}" 
-        @change="${this.updateNodeName}"> 
+        placeholder="path to provider, relative, same host or remote"
+        value="${this.providerpath}" 
+        @change="${this.updateProviderPath}"> 
       </vaadin-text-field>
 
       <vaadin-text-field
@@ -111,7 +111,7 @@ class NodeConsole extends connect(store)(LitElement) {
             r => html`
               <div class="result-item">
               <ul>
-                <li>${r.response.ok ? "(OK) " : "(Failed) "}${r.request.path}/${r.request.nodename}/${JSON.stringify({method: r.request.method, params: r.request.params, id: r.request.id}, null, 2)}</li>
+                <li>${r.response.ok ? "(OK) " : "(Failed) "}${r.request.path}/${JSON.stringify({method: r.request.method, params: r.request.params, id: r.request.id}, null, 2)}</li>
                 <li>${r.response.ok ? JSON.stringify(r.response.data, null, 2) : JSON.stringify(r.response)}</li>
               </ul>
               </div>
@@ -125,9 +125,7 @@ class NodeConsole extends connect(store)(LitElement) {
 
   static get properties() {
     return {
-      path: {type: String},
-      chain_path: {type: String},
-      nodename: {type: String},
+      providerpath: {type: String},
       method: {type: String},
       params: {type: String},
       apikey: {type: String},
@@ -155,8 +153,7 @@ class NodeConsole extends connect(store)(LitElement) {
   stateChanged(state) {
 
     this.chainId = state.nodeConsole.chainId;
-    this.path = state.nodeConsole.path;
-    this.chain_path = state.nodeConsole.chain_path;
+    this.providerpath = state.nodeConsole.providerpath;
     this.nodename = state.nodeConsole.nodename;
     this.idToken = state.auth.idToken;
 
@@ -188,12 +185,20 @@ class NodeConsole extends connect(store)(LitElement) {
       throw new Error('ethereum provider not present');
     }
 
-    // const scheme = window.location.host.startsWith('localhost') ? 'http' : 'https';
-    const scheme = 'https';
+    let scheme = 'https'
+    let url = this.providerpath;
+    if (! url.startswith('http')) {
+      scheme = window.location.host.startsWith('localhost') ? 'http' : 'https';
+      if (! url.startswith('/') ) {
+        url = "/" + url;
+      }
+      url = `{scheme}://{window.location.host}{url}`
+    }
+
     const network = {
       chainId: this.chainId,
       chainName: "iona chain1",
-      rpcUrls: [`${scheme}://${window.location.host}/chain/${parseInt(this.chainId)}/${this.idToken}`],
+      rpcUrls: [`{url}/${this.idToken}`],
     };
 
     try {
@@ -206,7 +211,6 @@ class NodeConsole extends connect(store)(LitElement) {
       console.log(`Adding network failed: ${addError.toString()}`);
       throw (addError);
     }
-
 
     /*
     try {
@@ -233,7 +237,6 @@ class NodeConsole extends connect(store)(LitElement) {
     }
     */
   }
-
 
   onClickConnectOrInstall(e) {
 
@@ -268,9 +271,6 @@ class NodeConsole extends connect(store)(LitElement) {
     }
   }
 
-  updateNodeName(e) {
-    store.dispatch(updateNodeName(e.target.value))
-  }
   updateMethod(e) {
     store.dispatch(updateMethod(e.target.value))
   }
@@ -285,12 +285,11 @@ class NodeConsole extends connect(store)(LitElement) {
 
     return new Promise((resolve, reject) => {
 
-        const url = ['', request.path,  request.nodename].join('/');
         const params = JSON.parse(request.params);
 
         const data=JSON.stringify({jsonrpc:"2.0", method: request.method, params: params, id: request.id});
         $.ajax({
-          url: url,
+          url: request.path,
           type: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,
@@ -311,12 +310,10 @@ class NodeConsole extends connect(store)(LitElement) {
 
     return new Promise((resolve, reject) => {
 
-        let url;
-
         if (this.apikey && this.apikey.length > 0) {
-            url = ['', request.path,  request.nodename, this.apikey].join('/');
+            url = [request.path,  this.apikey].join('/');
         } else {
-            url = ['', request.path,  request.nodename, this.idToken].join('/');
+            url = [request.path, this.idToken].join('/');
         }
 
         const params = JSON.parse(request.params);
@@ -353,8 +350,7 @@ class NodeConsole extends connect(store)(LitElement) {
   callProviderMethod(){
     const request = {
       id: this.requestId,
-      path: this.path,
-      nodename: this.nodename,
+      path: this.providerpath,
       method: this.method,
       params: this.params
     };
@@ -382,8 +378,7 @@ class NodeConsole extends connect(store)(LitElement) {
 
     const request = {
       id: this.requestId,
-      path: this.path,
-      nodename: this.nodename,
+      path: this.providerpath,
       method: this.method,
       params: this.params
     };

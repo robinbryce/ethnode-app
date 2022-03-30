@@ -1,5 +1,5 @@
 import {
-    UPDATE_NODENAME,
+    UPDATE_PROVIDER_PATH,
     UPDATE_METHOD,
     UPDATE_PARAMS,
     UPDATE_APIKEY,
@@ -7,15 +7,13 @@ import {
     CALL_PROVIDER_METHOD
 } from './nodeconsole-actions.js'
 
-const NODE_PATH = process.env.NODE_PATH || "node"
-const CHAIN_PROVIDER_PATH = process.env.CHAIN_PROVIDER_PATH || "chain"
+const NODE_PATH = "node"
+const CHAIN_PROVIDER_PATH = "chain"
 
 const INITIAL_STATE = {
     chainId: "0x63",
     accounts: [],
-    path: NODE_PATH,
-    chain_path: CHAIN_PROVIDER_PATH,
-    nodename: 'ethnode0',
+    providerpath: "stage/node/ethnode0",
     method: 'eth_blockNumber',
     params: '[]',
     apikey: '',
@@ -29,8 +27,9 @@ export const nodeConsole = (state = INITIAL_STATE, action) => {
     let end;
     switch (action.type) {
 
-    case UPDATE_NODENAME:
-        return { ...state, nodename: action.nodename };
+    case UPDATE_PROVIDER_PATH:
+        return { ...state, providerpath: action.providerpath };
+
     case UPDATE_METHOD:
         return { ...state, method: action.method };
     case UPDATE_PARAMS:
@@ -61,8 +60,6 @@ export const nodeConsole = (state = INITIAL_STATE, action) => {
         }, ...state.results.slice(0, end)];
 
         return state;
-
-
 
     default:
         return state;
