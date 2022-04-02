@@ -111,8 +111,10 @@ class NodeConsole extends connect(store)(LitElement) {
             r => html`
               <div class="result-item">
               <ul>
-                <li>${r.response.ok ? "(OK) " : "(Failed) "}${r.request.path}/${JSON.stringify({method: r.request.method, params: r.request.params, id: r.request.id}, null, 2)}</li>
-                <li>${r.response.ok ? JSON.stringify(r.response.data, null, 2) : JSON.stringify(r.response)}</li>
+                <li>
+                    ${JSON.stringify({method: r.request.method, params: r.request.params, id: r.request.id}, null, 2)}
+                    ${r.response.ok ? JSON.stringify(r.response.data, null, 2) : `${r.request.path} ${r.response.data.statusText}`}
+                </li>
               </ul>
               </div>
             `
@@ -192,8 +194,8 @@ class NodeConsole extends connect(store)(LitElement) {
       if (! url.startswith('/') ) {
         url = "/" + url;
       }
-      url = `{scheme}://{window.location.host}{url}`
     }
+    url = `{scheme}://{window.location.host}{url}`
 
     const network = {
       chainId: this.chainId,
@@ -310,29 +312,23 @@ class NodeConsole extends connect(store)(LitElement) {
 
     return new Promise((resolve, reject) => {
 
-        if (this.apikey && this.apikey.length > 0) {
-            url = [request.path,  this.apikey].join('/');
-        } else {
-            url = [request.path, this.idToken].join('/');
+      const params = JSON.parse(request.params);
+      const data=JSON.stringify({jsonrpc:"2.0", method: request.method, params: params, id: request.id});
+
+      $.ajax({
+        url: request.path,
+        type: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        data: data,
+        success: function(result) {
+          resolve(result);
+        },
+        error: function(error) {
+          reject(error);
         }
-
-        const params = JSON.parse(request.params);
-        const data=JSON.stringify({jsonrpc:"2.0", method: request.method, params: params, id: request.id});
-
-        $.ajax({
-          url: url,
-          type: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          data: data,
-          success: function(result) {
-            resolve(result);
-          },
-          error: function(error) {
-            reject(error);
-          }
-        })
+      })
     });
   }
 
@@ -374,11 +370,43 @@ class NodeConsole extends connect(store)(LitElement) {
 
   }
 
+  buildRawRequestURL() {
+    let url;
+
+    // TODO: Authorization: Basic {APIKEY} 
+    //       Authorization: Bearer {ID_TOKEN}
+    if (this.apikey && this.apikey.length > 0) {
+        url = [this.providerpath,  this.apikey].join('/');
+    } else {
+        url = [this.providerpath, this.idToken].join('/');
+    }
+
+    // If the url is already a full href we are done
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      return url;
+    }
+
+    // We need to make an href. If the providerpath is relative, append it to
+    // the window href. Otherwise use the window protocol & hostname to make an
+    // href based on the absoloute path.
+    if (url.startsWith('/')) {
+        let href = window.location.href;
+        if (!href.endsWith('/')) {
+          href = href + '/';
+        }
+        return `${window.location.href}${url}`;
+    }
+
+    return `${window.location.protocol}//${window.location.host}/${url}`
+  }
+
   callRawMethod() {
+
+    const url = this.buildRawRequestURL();
 
     const request = {
       id: this.requestId,
-      path: this.providerpath,
+      path: url,
       method: this.method,
       params: this.params
     };
